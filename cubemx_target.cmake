@@ -90,6 +90,50 @@ function(cube_attempt_identify_mcu ROOT_PATH OUT_MCU_NAME)
     endif ()
 endfunction()
 
+function(cube_configure_compiler_flags)
+    set(options USE_HAL USE_LL)
+    set(oneValueArgs ROOT_PATH MCU FLOAT_ABI)
+    set(multiValueArgs)
+
+    cmake_parse_arguments(ARG "${options}" "${oneValueArgs}"
+            "${multiValueArgs}" ${ARGN})
+
+    if (NOT DEFINED ARG_USE_HAL)
+        set(ARG_USE_HAL ON)
+    endif ()
+
+    if (NOT DEFINED ARG_USE_LL)
+        set(ARG_USE_LL OFF)
+    endif ()
+
+    if (NOT DEFINED ARG_ROOT_PATH)
+        set(ARG_ROOT_PATH ${CMAKE_CURRENT_LIST_DIR})
+    endif ()
+
+    if (NOT DEFINED ARG_MCU)
+        cube_attempt_identify_mcu(${ARG_ROOT_PATH} ARG_MCU)
+        if (NOT DEFINED ARG_MCU)
+            message(FATAL_ERROR "Failed to identify MCU. Please provide the MCU argument by hand.")
+        endif ()
+    endif ()
+
+    if (NOT DEFINED ARG_FLOAT_ABI)
+        set(ARG_FLOAT_ABI "hard")
+    endif ()
+
+    cube_mcu_to_defines("${ARG_MCU}"
+        USE_HAL ${ARG_USE_HAL}
+        USE_LL ${ARG_USE_LL}
+        FLOAT_ABI "${ARG_FLOAT_ABI}"
+        OUT_TOOLCHAIN_DEFS FLAGS_TO_ADD
+    )
+
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${FLAGS_TO_ADD}" PARENT_SCOPE)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${FLAGS_TO_ADD}" PARENT_SCOPE)
+    set(CMAKE_ASM_FLAGS "${CMAKE_ASM_FLAGS} ${FLAGS_TO_ADD}" PARENT_SCOPE)
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${FLAGS_TO_ADD}" PARENT_SCOPE)
+endfunction()
+
 function(cube_configure_target TARGET)
     set(options USE_HAL USE_LL)
     set(oneValueArgs ROOT_PATH MCU)

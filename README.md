@@ -73,20 +73,7 @@ following argument to your `cmake` command:
 
 `-DCMAKE_TOOLCHAIN_FILE=cubemx_cmake_helpers/arm-none-eabi.cubemx.cmake`
 
-You have the following configuration arguments for the toolchain file, which
-are to be passed alongside the `cmake` command:
-
-* `-DCUBE_USE_HAL`, values `ON`/`OFF`. Default `ON`. Adds the 
-`-DUSE_HAL_DRIVER` compiler flag to the common compilation flags when set.
-* `-DCUBE_USE_LL`, values `ON`/`OFF`. Default `OFF`. Adds the
-`-DUSE_LL_DRIVER` compiler flag to the common compilation flags when set.
-* `-DCUBE_FLOAT_ABI`, values `hard`/`soft`/`softfp`. Default `soft`.
-Controls the `-ffloat_abi=` value for the compiler.
-* `-DCUBE_MCU`. **Default value is automatically fetched from the project 
-structure if possible.** The 5-place MCU code for the MCU that you're using.
-Example format: `STM32F401xE`, note the `x`.
-* `-DCUBE_ROOT_PATH`. Default value is `${CMAKE_CURRENT_LIST_DIR}/..`. The
-path to the generated CubeMX project.
+However, the tooling **does not depend** on this toolchain file being used.
 
 ## CMakeLists.txt configuration
 
@@ -96,13 +83,22 @@ Configure your CMake target as an **executable**, and note that the tool
 assumes that the target's name ends with the suffix `.out`. Add your custom
 source files, flags, etc. The tool shouldn't interfere with them.
 
-Following this, invoke the `cube_configure_target()` function in your
-`CMakeLists.txt`. 
+Note that both C **and** ASM must be enabled as languages for the compiler,
+otherwise the startup file is not going to be compiled and the application
+will not boot properly.
+
+Following this, invoke the `cube_configure_compiler_flags()`
+and `cube_configure_target()` functions in your `CMakeLists.txt`. 
 
 A very minimal example would look like this:
 
 ```cmake
+enable_language(C CXX ASM)
+# C and ASM are required. Otherwise startup.s isn't getting compiled.
+
 include(cubemx_cmake_helpers/cubemx_target.cmake)
+
+cube_configure_compiler_flags()
 
 add_executable(myapp.out
   app/main.cpp # your own files
@@ -115,15 +111,25 @@ cube_configure_target(myapp)
 This will:
 
 * Attempt to determine the MCU name again.
+* Append MCU specific compiler flags to your already existing C, CXX, ASM,
+and linker compiler flags.
 * Glob the ST source files, add them to your target along with the include
 dirs. Also adds the startup file.
 * Configure the linker with the linker script.
 * Adds a custom command to generate `myapp.bin` and `myapp.hex`. Along with
 an appropriate clean configuration.
 
-The function call can be customized with further arguments, however:
+The function calls can be customized with further arguments, however:
 
 ```cmake
+cube_configure_compiler_flags(
+  MCU "STM32F401xE"
+  ROOT_PATH ${CMAKE_CURRENT_LIST_DIR}
+  USE_HAL ON
+  USE_LL OFF
+  FLOAT_ABI "hard"
+)
+
 cube_configure_target(myapp
   MCU "STM32F401xE"
   ROOT_PATH ${CMAKE_CURRENT_LIST_DIR}
@@ -142,3 +148,5 @@ is automatically fetched from the project structure if possible.**
 if `ON`.
 * `USE_LL`, values `ON`/`OFF`. Default `OFF`. Adds the `-DUSE_LL_DRIVER` flag to the target
 if `ON`.
+* `FLOAT_ABI`, values `"hard"`/`"soft"`/`"softfp"`. Default `"hard"`. Modifies the
+`-mfloat-abi` argument for compiler flags.
