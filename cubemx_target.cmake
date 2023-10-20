@@ -28,11 +28,11 @@ function(cube_mcu_to_defines MCU_NAME)
     endif ()
 
     if (DEFINED ARG_OUT_TOOLCHAIN_DEFS)
-        set(TOOLCHAIN_DEFS_STM32F4xx "-mcpu=cortex-m4 -mthumb -mfpu=fpv4-sp-d16")
-        set(TOOLCHAIN_DEFS_STM32F3xx "-mcpu=cortex-m4 -mthumb -mfpu=fpv4-sp-d16")
-        set(TOOLCHAIN_DEFS_STM32F2xx "-mcpu=cortex-m3 -mthumb")
-        set(TOOLCHAIN_DEFS_STM32F1xx "-mcpu=cortex-m3 -mthumb")
-        set(TOOLCHAIN_DEFS_STM32F0xx "-mcpu=cortex-m0 -mthumb")
+        set(TOOLCHAIN_DEFS_STM32F4xx "-mcpu=cortex-m4 -mfpu=fpv4-sp-d16")
+        set(TOOLCHAIN_DEFS_STM32F3xx "-mcpu=cortex-m4 -mfpu=fpv4-sp-d16")
+        set(TOOLCHAIN_DEFS_STM32F2xx "-mcpu=cortex-m3")
+        set(TOOLCHAIN_DEFS_STM32F1xx "-mcpu=cortex-m3")
+        set(TOOLCHAIN_DEFS_STM32F0xx "-mcpu=cortex-m0")
 
         set(TOOLCHAIN_DEFS_VAR "TOOLCHAIN_DEFS_${MCU_FAMILY}")
 
@@ -64,7 +64,7 @@ function(cube_mcu_to_defines MCU_NAME)
             set(SOURCE_DEFS "${SOURCE_DEFS} -DUSE_LL_DRIVER")
         endif ()
 
-        set(${ARG_OUT_SOURCE_DEFS} "${SOURCE_DEFS} $<$<CONFIG:Debug>:-g -gdwarf-2>" PARENT_SCOPE)
+        set(${ARG_OUT_SOURCE_DEFS} "${SOURCE_DEFS}" PARENT_SCOPE)
     endif ()
 
 endfunction()

@@ -28,13 +28,10 @@ Supported and "does it compile?" tested MCU families:
 
 ## What does this not support?
 
-Libraries downloaded from CubeMX (like embedTLS or such) are not tested
-currently. Probably don't work.
+Libraries downloaded from CubeMX (like embedTLS, FreeRTOS, or such) are not
+tested currently. Probably don't work.
 
 Feel free to PR support for'em. Just requires testing.
-
-The toolchain file itself requires work as well. Currently a Linux style
-case is assumed, where the compiler executables are globally accessible.
 
 # Why is this?
 
